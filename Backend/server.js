@@ -2,12 +2,21 @@ import express from "express";
 import dotenv from "dotenv";
 import { connectToDB } from "./configs/db.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import jobRoutes from "./routes/job.routes.js";
 
 const app = express();
 
 dotenv.config();
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+
+app.use(
+  cors({
+    origin: CLIENT_URL,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser()); // Add cookie parser middleware
 

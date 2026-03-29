@@ -2,6 +2,12 @@ import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+const getSafeUser = (user) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+});
 
 // ✅ REGISTER
 export const register = async (req, res) => {
@@ -29,10 +35,10 @@ export const register = async (req, res) => {
       password: hashedPassword,
     });
 
-    res.status(201).json({ message: "User registered", user });
+    res.status(201).json({ message: "User registered", user: getSafeUser(user) });
 
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -65,10 +71,25 @@ export const login = async (req, res) => {
       sameSite: "strict",
     });
 
-    res.status(200).json({ message: "Login successful" , Role: user.role});
+    res.status(200).json({ message: "Login successful", user: getSafeUser(user) });
 
   } catch (error) {
     res.status(500).json({ message: "Server error" , error: error.message });
+  }
+};
+
+// ✅ CURRENT USER
+export const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ user: getSafeUser(user) });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
